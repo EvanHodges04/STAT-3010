@@ -1,0 +1,147 @@
+---
+title: "Assignment 4"
+author: "Evan Hodges"
+date: "2025-03-27"
+output:
+  pdf_document:
+    keep_tex: true
+header-includes:
+  - \usepackage{sectsty}
+  - \sectionfont{\centering\LARGE}
+  - \usepackage{titling}
+  - \setlength{\droptitle}{-3cm}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Question 1
+\noindent\rule{\textwidth}{0.4pt}
+
+**Part A**
+```{r echo = TRUE}
+# Create the vectors
+Location <- c("A", "A", "A", "B", "B", "B", "C")
+Height <- c(100, 200, 300, 450, 600, 800, 1000)
+Distance <- c(253, 337, 395, 451, 495, 534, 573)
+
+# Create the data frame
+Galileo <- data.frame(Location, Height, Distance)
+
+# Display the data frame
+Galileo
+```
+\noindent\rule{\textwidth}{0.4pt}
+
+**Part B**
+```{r echo = TRUE}
+# Compute sample mean, median, variance, and IQR for Distance
+mean_distance <- mean(Galileo$Distance)
+median_distance <- median(Galileo$Distance)
+variance_distance <- var(Galileo$Distance)
+iqr_distance <- IQR(Galileo$Distance)
+
+# Display the results
+mean_distance
+median_distance
+variance_distance
+iqr_distance
+```
+\noindent\rule{\textwidth}{0.4pt}
+
+**Part C**
+```{r echo = TRUE}
+# Create estimated distance D.Hat and add it to the data frame
+Galileo$D.Hat <- 200 + 0.708 * Galileo$Height - 0.000344 * (Galileo$Height^2)
+
+# Create the LO variable: TRUE if estimated distance is lower than measured distance
+Galileo$LO <- Galileo$D.Hat < Galileo$Distance
+
+# Display the updated data frame
+Galileo
+
+# Extract the subset where LO is FALSE
+Galileo_subset <- Galileo[!Galileo$LO, ]
+Galileo_subset
+```
+\noindent\rule{\textwidth}{0.4pt}
+
+**Part D**
+```{r echo = TRUE}
+# Scatterplot of Distance vs Height
+plot(Galileo$Height, Galileo$Distance, 
+     main = "Distance vs Height with Estimated Distance Curve", 
+     xlab = "Height", ylab = "Distance", pch = 19)
+
+# Create a sequence of Height values for a smooth curve
+height_seq <- seq(min(Galileo$Height), max(Galileo$Height), length.out = 100)
+dhat_curve <- 200 + 0.708 * height_seq - 0.000344 * (height_seq^2)
+
+# Overlay the curve for estimated distance
+lines(height_seq, dhat_curve, col = "red", lwd = 2)
+```
+\noindent\rule{\textwidth}{0.4pt}
+
+# Question 2
+\noindent\rule{\textwidth}{0.4pt}
+
+**Part A**
+```{r echo = TRUE}
+# Read in the data from the CSV file
+humidity_data <- read.csv("hw4q2.csv", header = TRUE)
+
+# Inspect the first few rows and column names to verify the data
+head(humidity_data)
+names(humidity_data)
+
+# Create a boxplot comparing Humidity for Summer and Winter
+boxplot(Humidity ~ Season, data = humidity_data,
+        main = "Comparison of Humidity: Summer vs Winter",
+        xlab = "Season", ylab = "Humidity",
+        col = c("green", "blue"))
+```
+Comments:
+
+Winter’s median is slightly higher than Summer’s. Summer’s humidity ranges more widely, while Winter’s main cluster is tighter but includes a lower outlier. Winter shows slightly higher average humidity; Summer exhibits greater variability.
+\noindent\rule{\textwidth}{0.4pt}
+
+**Part B**
+```{r echo = TRUE}
+# Subset the data by Season
+summer_humidity <- subset(humidity_data, Season == "Summer")$Humidity
+winter_humidity <- subset(humidity_data, Season == "Winter")$Humidity
+
+# QQ plot for Summer humidity
+qqnorm(summer_humidity, main = "QQ Plot for Summer Humidity")
+qqline(summer_humidity, col = "red")
+
+# QQ plot for Winter humidity
+qqnorm(winter_humidity, main = "QQ Plot for Winter Humidity")
+qqline(winter_humidity, col = "red")
+```
+Comments:
+
+For the summer plot, the points generally align well with the reference line, suggesting that summer humidity is reasonably normally distributed. Any minor deviations are near the lower tail, indicating a few lower humidity readings that are slightly outside the main distribution. For the winter plot, the points also follow the line for much of the range, but the upper tail shows a slight upward deviation. This suggests a possible right skew or heavier upper tail in the winter humidity distribution compared to summer.
+\noindent\rule{\textwidth}{0.4pt}
+
+**Part C**
+```{r echo = TRUE}
+# Calculate variance and IQR for Summer humidity
+var_summer <- var(summer_humidity)
+iqr_summer <- IQR(summer_humidity)
+
+# Calculate variance and IQR for Winter humidity
+var_winter <- var(winter_humidity)
+iqr_winter <- IQR(winter_humidity)
+
+# Print the results
+var_summer
+iqr_summer
+var_winter
+iqr_winter
+```
+Comments:
+
+Winter humidity has a slightly higher variance than Summer, indicating marginally greater spread in Winter if we measure variability by variance. Summer humidity has a slightly higher IQR than Winter, suggesting marginally greater spread in Summer if we measure variability by the middle 50% of data.
+\noindent\rule{\textwidth}{0.4pt}
