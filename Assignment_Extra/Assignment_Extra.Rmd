@@ -1,0 +1,70 @@
+---
+title: "Extra Assignment"
+author: "Evan Hodges"
+date: '2025-04-11'
+output: pdf_document
+header-includes:
+  - \usepackage{titling}
+  - \setlength{\droptitle}{-50pt}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+@. Does pollution kill people? Total age-adjusted mortality from all causes, in deaths per 100,000 population, is the response variable. The 15 variables for each of 60 cities are (1) mean annual precipitation (in inches); (2) percent relative humidity (annual average at 1 P.M.); (3) mean January temperature(in degrees Fahrenheit); (4) mean July temperature (in degrees Fahrenheit); (5) percentage of the population aged 65 years or over; (6) population per household; (7) median number of school years completed by persons of age 25 years or more; (8) percentage of the housing that is sound with all facilities; (9) population density (in persons per square mile of urbanized area); (10) percentage of 1960 population that is nonwhite; (11) percentage of employment in white-collar occupations;(12) percentage of households with annual income under $3,000 in 1960; (13) relative pollution potential of hydrocarbons (HC); (14) relative pollution potential of oxides of nitrogen (NOX); and (15) relative pollution potential of sulfur dioxide (SO2). It is desired to determine whether the pollution variables (13, 14, and 15) are associated with mortality.
+
+    ```{r}
+    mort <- read.csv("mort.csv")
+    ```
+
+    a. Obtain a pairwise scatter plot to explore relationship between mortality and the pollution variables. Comment on your observations.
+    ```{r}
+    pollution_vars <- mort[, c("Mortality", "HC", "NOX", "SO2")]
+    pairs(pollution_vars, main = "Mortality vs. Pollution Variables")
+    
+    # From the scatter-plot matrix, you can see a general upward trend between Mortality 
+    # and each of the three pollution measures (HC, NOX, and SO2). Higher pollution 
+    # levels tend to coincide with higher mortality rates, although the strength of that 
+    # relationship may vary by pollutant. There also appears to be some clustering in the 
+    # data: a group of cities with relatively lower pollution and mortality, and another 
+    # set with higher values of both. Additionally, the pollution variables themselves 
+    # show positive associations with each other, suggesting that cities with high levels 
+    # of one pollutant tend to have high levels of the others as well.
+    ```
+    b. With mortality as the response, fit a regression involving the weather and socioeconomic variable as explanatory variables (independent variables), then use the R function stepAIC() to perform a stepwise regression to select the important variables. Describe          the relationship of the selected variables with mortality.
+    ```{r}
+    initial_model <- lm(Mortality ~ Precip + Humidity + JanTemp + JulyTemp + Over65 
+                        + House + Educ + Sound + Density + NonWhite + WhiteCol 
+                        + Poor, data = mort)
+    summary(initial_model)
+
+    library(MASS)
+    step_model <- stepAIC(initial_model, direction = "both", trace = FALSE)
+    summary(step_model)
+    
+    # In the final stepwise‐selected model, Mortality is explained best by 
+    # Precip, JanTemp, JulyTemp, House, Educ, Density, and NonWhite.
+    #
+    # Interpreting the regression coefficients:
+    # Precipitation (Precip) = higher mortality.
+    # Warmer winter (JanTemp) and summer (JulyTemp) = lower mortality.
+    # Areas with higher average housing (House) values = lower mortality.
+    # Higher levels of education (Educ) = lower mortality.
+    # More densely populated areas (Density) = slightly higher mortality.
+    # Higher proportions of nonwhite residents (NonWhite) = higher mortality.
+    ```
+    c. To the model chosen from stepwise regression, add the three pollution variables (transformed to their logarithms). Using the estimated coefficients, describe the relationship between the pollution variables and mortality.
+    ```{r}
+    mort$logHC <- log(mort$HC)
+    mort$logNOX <- log(mort$NOX)
+    mort$logSO2 <- log(mort$SO2)
+    
+    final_model <- update(step_model, . ~ . + logHC + logNOX + logSO2)
+    summary(final_model)
+    
+    # logHC suggests that higher levels of hydrocarbons correlate with a slight decrease
+    # in mortality— though this effect is relatively weak and only marginally significant.
+    # logNOX indicates that higher NO levels are associated with higher mortality. 
+    # logSO2 implies that there is no clear evidence of an SO2–mortality relationship.
+    ```
