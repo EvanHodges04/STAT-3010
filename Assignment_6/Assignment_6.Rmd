@@ -1,0 +1,93 @@
+---
+title: "Assignment 6"
+author: "Evan Hodges"
+date: "2025-04-24"
+geometry: margin=0.25in
+output: 
+  pdf_document: default
+header-includes:
+  - \usepackage{titling}
+  - \setlength{\droptitle}{-1cm}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(qcc)
+```
+
+@. After assembly and wiring of the individual keys, computer keyboards are tested by an automated test station that pushes each key several times. Daily records are kept of the number of keyboards inspected and the number that fail inspection. Data from 25 successive manufacturing days is in the file hw6q1.csv.
+
+    a. Calculate the centerline and the control limits for a p chart for this data.
+    ```{r}
+      keys <- read.csv("hw6q1.csv", header = TRUE)
+      p_chart <- qcc(keys$Failed, keys$Tested, type = "p", data.name = "Keyboards")
+      p_center <- p_chart$center
+      p_lcl   <- p_chart$limits[ ,1]
+      p_ucl   <- p_chart$limits[ ,2]
+      p_center; range(p_lcl); range(p_ucl)
+      # Overall defect proportion = 0.01043. LCL range = 0.00364 - 0.00419 and UCL = 0.01667 - 0.01723.
+    ```
+    b. Are there any signs of out-of-control conditions in this data?
+    ```{r}
+      p_chart$violations
+      # Yes, there is one point beyond the upper control limit (day 21).
+    ```
+@. When installing a bath faucet, it is important to properly fasten the threaded end of the faucet stem to the water-supply line. The threaded stem dimensions must meet product specifications, otherwise malfunction and leakage may occur. Researchers investigated the production process of a particular bath faucet manufactured in India. They reported the threaded stem diameter (target value being 13mm) of each faucet in 25 samples of size 4 as given in the dataset hw6q2.csv.
+
+    a. Construct an R chart for this data. Are there any out-of-control signals present?
+    ```{r}
+      faucet <- read.csv("hw6q2.csv", header = TRUE)
+      measurements <- faucet[, 2:5]
+      RChart <- qcc(measurements, type = "R", data.name = "Faucet R-chart")
+      RChart
+      RChart$violations
+      # No, there are no out-of-control signals present.
+    ```
+    b. Construct an X(bar) chart for this data. Are there any out-of-control signals present?
+    ```{r}
+      XbarChart <- qcc(measurements, type = "xbar", data.name = "Faucet X(bar)-chart")
+      XbarChart
+      XbarChart$violations
+      # Yes, subgroups 3, 18, and 25 fall outside the LCL/UCL limits.
+    ```
+    c. If there are any out-of-control conditions in parts (a) or (b), reconstruct and interpret the revised X(bar) and R charts after eliminating these subgroups.
+    ```{r}
+      violating <- sort(unique(c(unlist(RChart$violations), unlist(XbarChart$violations))))
+      measurements_rev <- measurements
+      if(length(violating)>0) measurements_rev <- measurements[-violating, ]
+      
+      RChart_rev <- qcc(measurements_rev, type = "R", data.name = "Revised R-chart")
+      RChart_rev
+      
+      XbarChart_rev <- qcc(measurements_rev, type = "xbar", data.name = "Revised X(bar)-chart")
+      XbarChart_rev
+      # After removing the out-of-control conditions, the revised R-chart shows no further violations.
+    ```
+    
+@. Random samples of size n are taken from a normal population whose standard deviation is known to be 5.
+
+    a. For random samples of size n=10, calculate the area under the sampling distribution curve for X(bar) between the values (population mean)-1 and (population mean)+1. That is, find the probability that the sample mean lies within ±1 unit of the population mean.
+    ```{r}
+      sigma <- 5
+      n1 <- 10
+      se1 <- sigma / sqrt(n1)
+      prob1 <- pnorm(1 / se1) - pnorm(-1 / se1)
+      prob1
+      # For n=10, the probability that the sample mean lies within ±1 unit of the population mean = 0.47.
+    ```
+    b. Repeat the probability calculation in part (a) for samples of size n=50, n=100, and n=1000.
+    ```{r}
+      n_values <- c(10, 50, 100, 1000)
+      probs    <- sapply(n_values, function(n) pnorm(1/(sigma/sqrt(n))) - pnorm(-1/(sigma/sqrt(n))))
+      results  <- data.frame(n = n_values, Probability = probs)
+      results
+      # As n increases, the chance that the sample mean lies within ±1 unit of the population mean increases.
+    ```
+    c. Graph the probabilities you found in parts (a) and (b) versus their corresponding sample sizes, n. What can you conlude from this graph.
+    ```{r}
+      plot(results$n, results$Probability, type = "b",
+       xlab = "Sample Size (n)",
+       ylab = expression(P(abs(bar(X)- mu) <= 1)),
+       main = "Probability vs. Sample Size")
+      # The sampling distribution narrows as n grows, so the probability approaches 1.
+    ```
