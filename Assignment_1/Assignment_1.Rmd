@@ -1,0 +1,102 @@
+---
+title: "Assignment 1"
+author: "Evan Hodges"
+date: "2025-02-04"
+output:
+  pdf_document: default
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Question 1
+
+Consider the following stem-and-leaf plot. Provide the 5-number summary for the data.
+
+\bigskip
+
+**Answer:**
+
+Code here:
+```{r echo = TRUE}
+# Recovered data from the stem-and-leaf plot:
+x <- c(3.1, 3.5, 3.6, 3.6, 3.7, 3.8,
+       4.0, 4.0, 4.0, 4.1, 4.1, 4.2, 4.2, 4.2, 4.2, 4.2, 4.3, 4.4,
+       4.5, 4.6, 4.6, 4.7, 4.8, 4.8, 4.8,
+       5.1, 5.4, 5.4, 5.5, 5.8,
+       6.2, 6.6, 6.6, 6.7, 6.8,
+       7.5)
+
+# Five-number summary:
+fivenum(x)
+summary(x)
+
+# Double-check with stem() function:
+stem(x)
+```
+
+
+# Question 2
+
+In the article below, researchers concluded that physical exercise can keep the brain sharp into old age. After reading the study, answer the following questions:
+(Hint: for statistical thinking only; any reasonable analysis will be granted full credit.)
+
+
+\begin{enumerate}
+\item Do you think the conclusions derived from studying rats would be valid for humans?
+\item What factors other than exercise might influence the results of the study?
+\end{enumerate}
+
+\bigskip
+
+**Answer:**
+
+1. Although the study offers valuable insights into how exercise can affect brain health by increasing growth factors (like BDNF), I wouldn't consider directly applying these findings to humans. Rats share some physiological mechanisms with humans, but differences in brain complexity, lifespan, and environmental influences mean that results in rats do not automatically imply the same effects in humans. Additional human studies would be needed for a definitive conclusion.
+
+2. Besides exercise, several factors may impact brain health and the study’s outcomes. These include genetic predispositions, diet, environmental enrichment, stress levels, social interactions, and overall lifestyle. In the rat study, variability in individual activity habits might also be influenced by these factors, and similar confounding variables are likely relevant when considering human brain health.
+
+
+# Question 3
+
+Temperature transducers of a certain type are shipped in batches of 50. A sample of 60 batches was selected, and the number of defective transducers in each batch was determined. The data are given in the file `Transducers.csv`.
+
+\begin{enumerate}
+\item What proportion of batches in the sample have at most 5 defective transducers?
+\item Draw a histogram of the data using density on the vertical scale, and comment on its features. 
+\end{enumerate}
+    
+    
+\bigskip
+
+**Answer:**
+
+Code here:
+```{r echo = TRUE}
+# Loading the dataset from the CSV file:
+trans <- read.csv("Transducers.csv", header = FALSE)
+
+# 1. Calculate the proportion of batches with at most 5 defective transducers:
+prop_at_most_5 <- mean(trans$V1 <= 5)
+prop_at_most_5
+
+
+# 2. Draw a histogram of the data using density on the vertical scale:
+
+hist(trans$V1, probability = TRUE, right = TRUE,
+     main = "Histogram of Defective Transducers (right = TRUE)",
+     xlab = "Number of Defective Transducers", col = "green")
+
+hist(trans$V1, probability = TRUE, right = FALSE,
+     main = "Histogram of Defective Transducers (right = FALSE)",
+     xlab = "Number of Defective Transducers", col = "red")
+
+# Comments:
+# The histograms show that the vast majority of batches have a low number of defective 
+# transducers.
+# Approximately 91.67% of the batches have at most 5 defects.
+# The distribution is concentrated toward the lower end with a few batches exhibiting 
+# higher defect counts.
+```
