@@ -1,0 +1,114 @@
+---
+title: "Assignment 5"
+author: "Evan Hodges"
+date: '2025-04-08'
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+@. Efficient design of certain types of municipal waste incinerators requires that information about energy content of the waste be available. Data are given on $y =$ energy content (kcal/kg); the three physical composition variables $x_1 =$ % plastics by weight, $x_2 =$ % paper by weight, and $x_3 =$ % garbage by weight; and the proximate analysis variable $x_4 =$ % moisture by weight for waste specimens obtained from a certain region.
+
+    ```{r}
+    energy <- read.csv("hw5q1.csv", header = TRUE)
+    ```
+
+    a. Fit a regression function with the four aforementioned variables as predictors of energy. Provide a summary of the result and comment on the direction of the relationships of the predictors and energy.
+    ```{r}
+    energy_model <- lm(Energy ~ Plastics + Paper + Garbage + Water, data = energy)
+    summary(energy_model)
+    # For each 1% increase in plastics, the energy content increases by ~28.93kcal/kg. An 
+    # increase in paper content is also associated with an increase in energy, but not 
+    # as much as plastics. Garbage has a modest positive relationship. Water shows a 
+    # negative relationship- as the water content increases, energy content decreases.
+    ```
+    b. Predict the value of energy content when plastics is 17.03, paper is 23.46, garbage is 32.45, and water is 53.23. Also determine the corresponding residual. (Hint: This is observation \# 11 in the dataset)
+    ```{r}
+    new_data <- data.frame(Plastics = 17.03, Paper = 23.46, Garbage = 32.45, Water = 53.23)
+    
+    predicted_energy <- predict(energy_model, newdata = new_data)
+    predicted_energy
+    
+    actual_energy <- energy$Energy[11]
+    actual_energy
+    
+    residual_11 <- actual_energy - predicted_energy
+    residual_11
+    ```
+    c. What proportion of variation in energy content can be explained by the approximate relationship between energy content and the four predictors?
+    ```{r}
+    model_summary <- summary(energy_model)
+    r_squared <- model_summary$r.squared
+    adj_r_squared <- model_summary$adj.r.squared
+    
+    r_squared
+    adj_r_squared
+    ```
+
+@. Historically, reinforced concrete structures used externally bonded steel plates to add strength and support. Recently, fiber reinforced polymer (FRP) plates have been used instead of steel plates because of their superior properties. Investigators developed a method to mathematically model bond strength between a carbon FRP and a concrete substrate. For each of 15 carbon FRP–concrete samples, they reported the maximum transferable load (kN) calculated by the model (Calc) and compared this with the corresponding maximum transferable load (kN) as measured in the laboratory (Meas). The data are given here:
+
+    ```{r}
+    conc <- read.csv("hw5q2.csv", header = TRUE)
+    ```
+
+    a. Construct a scatterplot of the data. Does it seem to be the case that, in general, when the measured load is low, the calculated load is also low? For each sample, are the two variables relatively closely related in value?
+    ```{r}
+    plot(conc$Meas, conc$Calc,
+     main = "Scatterplot of Calculated vs. Measured Load",
+     xlab = "Measured Load (kN)",
+     ylab = "Calculated Load (kN)",
+     pch = 19, col = "blue")
+    # The scatterplot shows that when the measured load is low, the calculated load 
+    # is also low. Moreover, the individual sample values are fairly closely related, 
+    # indicating a strong correspondence between the two measures.
+    ```
+    b. Calculate the value of the sample correlation coefficient. Does it confirm your impression from the scatterplot?
+    ```{r}
+    cor_coeff <- cor(conc$Meas, conc$Calc)
+    cor_coeff
+    # The sample correlation coefficient is 0.9030, which confirms a strong positive 
+    # linear relationship between the calculated and measured loads.
+    ```
+
+@. The collapse of reinforced concrete buildings during earthquakes can result in significant loss of property and life. Often such collapses are caused by concrete column axial failure. A study investigated how $y =$ maximum sustained shear (Vmax, in kN) is influenced by $x_1 =$ transverse reinforcement yield stress (MPa) and $x_2 =$ concrete cylinder compressive strength (MPa).
+
+    ```{r}
+    shear <- read.csv("hw5q3.csv", header = TRUE)
+    ```
+Use \texttt{\large R} to fit and summarize
+
+    a. $y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \varepsilon$
+    ```{r}
+    model_a <- lm(y ~ x1 + x2, data = shear)
+    summary(model_a)
+    ```
+    b. $y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_1x_2 + \varepsilon$ 
+    ```{r}
+    shear$x1x2 <- shear$x1 * shear$x2
+
+    model_b <- lm(y ~ x1 + x2 + x1x2, data = shear)
+    summary(model_b)
+    ```
+    c. $y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \beta_3 x_1x_2 + \beta_4 x_1^2 + \beta_5 x_2^2 + \varepsilon$
+    ```{r}
+    shear$x1sq <- shear$x1^2
+    shear$x2sq <- shear$x2^2
+    
+    model_c <- lm(y ~ x1 + x2 + x1x2 + x1sq + x2sq, data = shear)
+    summary(model_c)
+    ```
+    d. Which one is the best model? Justify.
+    ```{r}
+    adj_r2_a <- summary(model_a)$adj.r.squared
+    adj_r2_b <- summary(model_b)$adj.r.squared
+    adj_r2_c <- summary(model_c)$adj.r.squared
+    
+    adj_r2_a
+    adj_r2_b
+    adj_r2_c
+    # Model (c) is clearly the best model, as it has the highest adjusted R² value. 
+    # This indicates that including both the interaction and quadratic terms provides 
+    # a significantly better fit for predicting maximum sustained shear.
+    ```
